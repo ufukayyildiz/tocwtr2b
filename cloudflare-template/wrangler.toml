@@ -1,0 +1,46 @@
+name = "tr2b"
+compatibility_date = "2024-11-06"
+main = "src/index.ts"
+
+# Assets configuration for serving the React frontend
+[assets]
+directory = "./dist/public"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "single-page-application"
+
+# Environment variables (set via wrangler secret put or dashboard)
+[vars]
+NODE_ENV = "production"
+PORT = "8000"
+
+# KV storage for session management (optional)
+[[kv_namespaces]]
+binding = "SESSION_KV"
+id = "your_kv_namespace_id"
+preview_id = "your_preview_kv_namespace_id"
+
+# Durable Objects for real-time features (if needed)
+# [[durable_objects.bindings]]
+# name = "TR2B_DO"
+# class_name = "TR2BDurableObject"
+
+# Analytics and monitoring
+[analytics_engine_datasets]
+# Uncomment if you want analytics
+# [[analytics_engine_datasets]]
+# binding = "ANALYTICS"
+
+# Staging environment
+[env.staging]
+name = "tr2b-staging"
+vars = { NODE_ENV = "staging" }
+
+# Development environment
+[env.development]
+name = "tr2b-dev"
+vars = { NODE_ENV = "development" }
+
+# Resource limits
+[limits]
+cpu_ms = 50

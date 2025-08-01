@@ -1,0 +1,99 @@
+name: Deploy TR2B to Cloudflare Workers
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Clone and build TR2B
+        env:
+          TR2B_REPO_URL: ${{ vars.TR2B_REPO_URL || 'https://github.com/YOUR_USERNAME/TR2B.git' }}
+        run: |
+          echo "📥 Cloning TR2B from: $TR2B_REPO_URL"
+          
+          # Create temp directory
+          TMP_DIR=$(mktemp -d)
+          
+          # Clone TR2B repository
+          git clone "$TR2B_REPO_URL" "$TMP_DIR/tr2b"
+          
+          # Build TR2B
+          cd "$TMP_DIR/tr2b"
+          npm install
+          npm run build || npm run build:client
+          
+          # Copy built assets
+          cd $GITHUB_WORKSPACE
+          mkdir -p dist/public
+          
+          if [ -d "$TMP_DIR/tr2b/dist" ]; then
+            cp -r "$TMP_DIR/tr2b/dist"/* dist/public/
+          elif [ -d "$TMP_DIR/tr2b/build" ]; then
+            cp -r "$TMP_DIR/tr2b/build"/* dist/public/
+          elif [ -d "$TMP_DIR/tr2b/client/dist" ]; then
+            cp -r "$TMP_DIR/tr2b/client/dist"/* dist/public/
+          else
+            echo "❌ Could not find built frontend assets"
+            exit 1
+          fi
+          
+          # Clean up
+          rm -rf "$TMP_DIR"
+          
+      - name: Deploy to Cloudflare Workers (Production)
+        if: github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy
+          
+      - name: Deploy to Cloudflare Workers (Staging)
+        if: github.ref != 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env staging
+          
+      - name: Comment deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `
+            🚀 **Deployment Successful!**
+            
+            Your TR2B app has been deployed to Cloudflare Workers.
+            
+            **Staging URL:** \`tr2b-staging.YOUR_SUBDOMAIN.workers.dev\`
+            
+            **Environment:** \`staging\`
+            **Commit:** \`${{ github.sha }}\`
+            **Branch:** \`${{ github.head_ref }}\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
