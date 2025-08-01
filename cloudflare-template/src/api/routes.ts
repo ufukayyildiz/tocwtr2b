@@ -35,7 +35,7 @@ class WorkersStorage implements IStorage {
 const storage = new WorkersStorage();
 
 // User management routes
-api.get('/users/:id', async (c) => {
+api.get('/users/:id', async (c: any) => {
   try {
     const id = c.req.param('id');
     const user = await storage.getUser(id);
@@ -51,7 +51,7 @@ api.get('/users/:id', async (c) => {
   }
 });
 
-api.post('/users', async (c) => {
+api.post('/users', async (c: any) => {
   try {
     const userData = await c.req.json();
     
@@ -78,7 +78,7 @@ api.post('/users', async (c) => {
 });
 
 // Authentication routes
-api.post('/auth/login', async (c) => {
+api.post('/auth/login', async (c: any) => {
   try {
     const { username, password } = await c.req.json();
     
@@ -104,13 +104,13 @@ api.post('/auth/login', async (c) => {
   }
 });
 
-api.post('/auth/logout', async (c) => {
+api.post('/auth/logout', async (c: any) => {
   // In a real app, you'd invalidate the session/token here
   return c.json({ message: 'Logout successful' });
 });
 
 // Data endpoints (adapt these based on your TR2B app needs)
-api.get('/data', async (c) => {
+api.get('/data', async (c: any) => {
   try {
     // Replace with your actual data fetching logic
     const data = {
@@ -127,7 +127,7 @@ api.get('/data', async (c) => {
   }
 });
 
-api.post('/data', async (c) => {
+api.post('/data', async (c: any) => {
   try {
     const itemData = await c.req.json();
     
@@ -146,7 +146,7 @@ api.post('/data', async (c) => {
 });
 
 // Environment info (useful for debugging)
-api.get('/env', async (c) => {
+api.get('/env', async (c: any) => {
   return c.json({
     nodeEnv: c.env.NODE_ENV || 'production',
     timestamp: new Date().toISOString(),

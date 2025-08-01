@@ -43,15 +43,29 @@ echo -e "${BLUE}📁 Using temporary directory: $TMP_DIR${NC}"
 
 if [ -z "$TR2B_REPO_URL" ]; then
     echo -e "${YELLOW}⚠️  TR2B_REPO_URL not set. Using default...${NC}"
-    TR2B_REPO_URL="https://github.com/YOUR_USERNAME/TR2B.git"
+    TR2B_REPO_URL="https://github.com/ufukayyildiz/TR2B_REPLIT_OR_DATA.git"
 fi
 
 echo -e "${BLUE}📥 Cloning TR2B from: $TR2B_REPO_URL${NC}"
-git clone "$TR2B_REPO_URL" "$TMP_DIR/tr2b" || {
-    echo -e "${RED}❌ Failed to clone TR2B repository.${NC}"
-    echo -e "${YELLOW}💡 Please ensure TR2B_REPO_URL is set correctly.${NC}"
-    exit 1
-}
+
+# Handle private repositories with GitHub token
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo -e "${BLUE}🔐 Using GitHub token for private repository access${NC}"
+    REPO_URL_WITH_TOKEN=$(echo "$TR2B_REPO_URL" | sed "s|https://github.com/|https://$GITHUB_TOKEN@github.com/|")
+    git clone "$REPO_URL_WITH_TOKEN" "$TMP_DIR/tr2b" || {
+        echo -e "${RED}❌ Failed to clone TR2B repository with token.${NC}"
+        echo -e "${YELLOW}💡 Please check your GITHUB_TOKEN and repository access.${NC}"
+        exit 1
+    }
+else
+    # Try cloning without token (for public repos)
+    git clone "$TR2B_REPO_URL" "$TMP_DIR/tr2b" || {
+        echo -e "${RED}❌ Failed to clone TR2B repository.${NC}"
+        echo -e "${YELLOW}💡 For private repositories, set GITHUB_TOKEN environment variable.${NC}"
+        echo -e "${YELLOW}💡 For public repositories, ensure TR2B_REPO_URL is correct.${NC}"
+        exit 1
+    }
+fi
 
 # Build the frontend
 echo -e "${BLUE}🏗️  Building TR2B frontend...${NC}"

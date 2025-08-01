@@ -19,7 +19,7 @@ app.use('*', cors({
 app.route('/api', apiRoutes);
 
 // Health check endpoint
-app.get('/health', (c) => {
+app.get('/health', (c: any) => {
   return c.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -40,7 +40,7 @@ app.get('*', serveStatic({
 }));
 
 // Error handling
-app.onError((err, c) => {
+app.onError((err: any, c: any) => {
   console.error('Application error:', err);
   return c.json({ 
     error: 'Internal Server Error',
@@ -50,7 +50,7 @@ app.onError((err, c) => {
 });
 
 // 404 handler
-app.notFound((c) => {
+app.notFound((c: any) => {
   // For API routes, return JSON error
   if (c.req.path.startsWith('/api/')) {
     return c.json({ error: 'Not Found', path: c.req.path }, 404);

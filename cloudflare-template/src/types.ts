@@ -6,16 +6,16 @@ export interface Env {
   API_KEY?: string;
   
   // KV namespaces
-  SESSION_KV?: KVNamespace;
+  SESSION_KV?: any;
   
   // R2 buckets (if needed)
-  ASSETS_BUCKET?: R2Bucket;
+  ASSETS_BUCKET?: any;
   
   // Durable Objects (if needed)
-  TR2B_DO?: DurableObjectNamespace;
+  TR2B_DO?: any;
   
   // Analytics Engine (if needed)
-  ANALYTICS?: AnalyticsEngineDataset;
+  ANALYTICS?: any;
 }
 
 // User types (adapt from your shared schema)

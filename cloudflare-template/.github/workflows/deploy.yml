@@ -27,15 +27,21 @@ jobs:
         
       - name: Clone and build TR2B
         env:
-          TR2B_REPO_URL: ${{ vars.TR2B_REPO_URL || 'https://github.com/YOUR_USERNAME/TR2B.git' }}
+          TR2B_REPO_URL: ${{ vars.TR2B_REPO_URL || 'https://github.com/ufukayyildiz/TR2B_REPLIT_OR_DATA.git' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "📥 Cloning TR2B from: $TR2B_REPO_URL"
           
           # Create temp directory
           TMP_DIR=$(mktemp -d)
           
-          # Clone TR2B repository
-          git clone "$TR2B_REPO_URL" "$TMP_DIR/tr2b"
+          # Clone TR2B repository (with authentication for private repos)
+          if [ -n "$GITHUB_TOKEN" ]; then
+            REPO_URL_WITH_TOKEN=$(echo "$TR2B_REPO_URL" | sed "s|https://github.com/|https://$GITHUB_TOKEN@github.com/|")
+            git clone "$REPO_URL_WITH_TOKEN" "$TMP_DIR/tr2b"
+          else
+            git clone "$TR2B_REPO_URL" "$TMP_DIR/tr2b"
+          fi
           
           # Build TR2B
           cd "$TMP_DIR/tr2b"

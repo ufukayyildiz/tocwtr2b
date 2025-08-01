@@ -2,7 +2,7 @@ name = "tr2b"
 compatibility_date = "2024-11-06"
 main = "src/index.ts"
 
-# Assets configuration for serving the React frontend
+# Assets configuration for serving the React frontend built from TR2B
 [assets]
 directory = "./dist/public"
 binding = "ASSETS"

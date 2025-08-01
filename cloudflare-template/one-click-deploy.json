@@ -1,0 +1,88 @@
+{
+  "name": "TR2B Cloudflare Workers Deployment",
+  "description": "Deploy TR2B (Template React To Backend) application to Cloudflare Workers with one click",
+  "repository": {
+    "url": "https://github.com/YOUR_USERNAME/TR2B-cloudflare-template",
+    "branch": "main"
+  },
+  "preview": {
+    "title": "TR2B Application",
+    "description": "Full-stack React and Express application running on Cloudflare Workers",
+    "image": "https://via.placeholder.com/600x400/3498db/ffffff?text=TR2B+Application"
+  },
+  "setup": {
+    "steps": [
+      {
+        "title": "Configure Repository Access",
+        "description": "Set up access to your private TR2B repository",
+        "fields": [
+          {
+            "name": "GITHUB_TOKEN",
+            "type": "secret",
+            "required": true,
+            "description": "GitHub Personal Access Token for private repository access"
+          },
+          {
+            "name": "TR2B_REPO_URL", 
+            "type": "string",
+            "default": "https://github.com/ufukayyildiz/TR2B_REPLIT_OR_DATA.git",
+            "description": "URL of your TR2B repository"
+          }
+        ]
+      },
+      {
+        "title": "Application Configuration",
+        "description": "Configure your TR2B application settings",
+        "fields": [
+          {
+            "name": "NODE_ENV",
+            "type": "string",
+            "default": "production",
+            "description": "Node.js environment"
+          },
+          {
+            "name": "DATABASE_URL",
+            "type": "secret",
+            "required": false,
+            "description": "Database connection string (if using external database)"
+          },
+          {
+            "name": "API_KEY",
+            "type": "secret", 
+            "required": false,
+            "description": "API key for external services (if required)"
+          }
+        ]
+      }
+    ]
+  },
+  "build": {
+    "command": "./deploy.sh",
+    "env": {
+      "NODE_VERSION": "18"
+    }
+  },
+  "deploy": {
+    "compatibility_date": "2024-11-06",
+    "assets": {
+      "directory": "./dist/public",
+      "binding": "ASSETS"
+    },
+    "kv_namespaces": [
+      {
+        "binding": "SESSION_KV",
+        "preview_binding": "SESSION_KV_PREVIEW"
+      }
+    ]
+  },
+  "metadata": {
+    "categories": ["web-application", "full-stack", "react", "express"],
+    "tags": ["react", "express", "typescript", "cloudflare-workers", "full-stack"],
+    "author": {
+      "name": "TR2B Template",
+      "url": "https://github.com/YOUR_USERNAME/TR2B-cloudflare-template"
+    },
+    "license": "MIT",
+    "version": "1.0.0"
+  }
+}
