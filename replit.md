@@ -8,6 +8,13 @@ TR2B is a full-stack web application built with a modern tech stack featuring Re
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **Template Structure Update (2025-01-31)**: Recreated the TR2B Cloudflare Workers template to follow the exact format of official Cloudflare templates like R2-Explorer
+- **Proper Template Format**: Implemented wrangler.json configuration, package.json with cloudflare metadata, and official template structure
+- **GitHub Repository Integration**: Added automated setup script that handles private repository cloning and building
+- **One-Click Deployment**: Created template that matches Cloudflare's official template requirements for deployment marketplace
+
 ## System Architecture
 
 ### Frontend Architecture

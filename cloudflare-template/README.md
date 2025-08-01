@@ -1,74 +1,86 @@
-# TR2B Cloudflare Workers Deployment Template
-
-This template provides automated deployment of the TR2B project (https://github.com/ufukayyildiz/TR2B_REPLIT_OR_DATA.git) to Cloudflare Workers with full support for private repositories.
+# TR2B Full-Stack App
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOUR_USERNAME/TR2B-cloudflare-template)
 
+![TR2B Application Preview](https://via.placeholder.com/600x400/3498db/ffffff?text=TR2B+Application)
+
+Deploy TR2B (Template React To Backend) full-stack application to Cloudflare Workers with one-click deployment.
+
 ## About TR2B
 
-TR2B (Template React To Backend) is a full-stack web application built with:
-- **Frontend**: React with TypeScript, Vite build system, Tailwind CSS
-- **Backend**: Express.js with TypeScript, Drizzle ORM, PostgreSQL support
-- **Architecture**: Component-based UI system with shadcn/ui components
+TR2B (Template React To Backend) is a full-stack web application featuring:
 
-This template automatically adapts TR2B to run on Cloudflare Workers with optimized static asset serving and serverless backend functionality.
+- **🚀 Modern Stack**: React + TypeScript + Express.js
+- **⚡ Edge Computing**: Optimized for Cloudflare Workers
+- **🎨 Beautiful UI**: Shadcn/ui components with Tailwind CSS
+- **💾 Data Storage**: Cloudflare KV for session management
+- **🔧 Developer Experience**: Hot reload, TypeScript, modern tooling
 
-## Quick Deployment
+This template automatically clones your TR2B repository, builds the frontend, adapts the backend for serverless, and deploys everything to Cloudflare's global edge network.
 
-### Method 1: Automated Script (Recommended for Private Repo)
+## Getting Started
 
-The easiest way to deploy your private TR2B repository:
+Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
 
 ```bash
-# Clone this template
-git clone https://github.com/YOUR_USERNAME/TR2B-cloudflare-template.git
-cd TR2B-cloudflare-template
-
-# Set your GitHub token for private repo access
-export GITHUB_TOKEN="your_github_personal_access_token"
-
-# Run the automated deployment script
-./deploy-tr2b.sh
+npm create cloudflare@latest -- --template=YOUR_USERNAME/TR2B-cloudflare-template
 ```
 
-### Method 2: One-Click Deploy (For Public Repos)
+**Important**: When using C3 to create this project, select "no" when it asks if you want to deploy. You need to follow this project's setup steps before deploying.
 
-1. Click the "Deploy to Cloudflare Workers" button above
-2. Follow the Cloudflare dashboard setup
-3. Configure your environment variables
-4. Deploy!
+## Setup Steps
 
-### Method 3: Manual Step-by-Step
-
-1. **Prerequisites**
-   - Node.js 18+ installed
-   - Cloudflare account with Wrangler CLI: `npm install -g wrangler`
-   - GitHub Personal Access Token (for private repositories)
-
-2. **Setup**
+1. **Install dependencies**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/TR2B-cloudflare-template.git
-   cd TR2B-cloudflare-template
    npm install
-   wrangler login
    ```
 
-3. **Configure Secrets**
+2. **Authenticate with Cloudflare**
    ```bash
-   # Required for private repository access
-   wrangler secret put GITHUB_TOKEN
-   
-   # Optional: Set other environment variables
-   wrangler secret put DATABASE_URL
-   wrangler secret put API_KEY
+   npx wrangler login
    ```
 
-4. **Deploy**
+3. **Set up GitHub access** (for private repository)
    ```bash
-   ./deploy.sh  # Uses the repository-aware deployment script
-   # OR
-   npm run deploy  # Basic deployment
+   # Set your GitHub Personal Access Token
+   export GITHUB_TOKEN="your_github_token_here"
    ```
+
+4. **Run setup script**
+   ```bash
+   npm run setup
+   ```
+
+5. **Deploy**
+   ```bash
+   npm run deploy
+   ```
+
+## Key Features
+
+- **🔒 Private Repository Support**: Automatic authentication and cloning of private TR2B repositories
+- **⚡ Edge-First**: Optimized for Cloudflare Workers with global edge deployment
+- **📁 Asset Management**: Automatic frontend build and static asset serving
+- **💾 KV Storage**: Session management using Cloudflare KV
+- **🔧 Zero Configuration**: Automatic setup of all required Cloudflare resources
+- **🚀 One-Click Deploy**: Complete deployment with a single command
+
+## Next Steps
+
+By default, this template:
+
+1. **Clones your TR2B repository** from the private GitHub repository
+2. **Builds the React frontend** using the existing build configuration
+3. **Adapts the Express backend** to run on Cloudflare Workers using Hono
+4. **Sets up KV storage** for session management and data persistence
+5. **Configures asset serving** for optimal performance on the edge
+
+After deployment, you can:
+
+- **Monitor your application**: `wrangler tail` for real-time logs
+- **Manage KV data**: `wrangler kv:key list --binding SESSION_KV`
+- **Update your app**: Redeploy with `npm run deploy`
+- **Scale globally**: Your app runs on Cloudflare's global edge network
 
 ## Configuration
 

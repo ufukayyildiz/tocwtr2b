@@ -1,63 +1,121 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { serveStatic } from 'hono/cloudflare-workers';
-import { apiRoutes } from './api/routes';
-import type { Env } from './types';
+import { Hono } from 'hono'
+import { serveStatic } from 'hono/cloudflare-workers'
 
-const app = new Hono<{ Bindings: Env }>();
+type Bindings = {
+  ASSETS: Fetcher
+  SESSION_KV: KVNamespace
+}
 
-// Middleware
-app.use('*', logger());
-app.use('*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// API routes (adapted from Express backend)
-app.route('/api', apiRoutes);
+const app = new Hono<{ Bindings: Bindings }>()
 
 // Health check endpoint
-app.get('/health', (c: any) => {
+app.get('/api/health', (c) => {
   return c.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    environment: c.env.NODE_ENV || 'production'
-  });
-});
+    environment: 'production',
+    platform: 'Cloudflare Workers',
+    message: 'TR2B application running on the edge'
+  })
+})
 
-// Serve static assets for React frontend
-app.get('/assets/*', serveStatic({ root: './' }));
-app.get('/src/*', serveStatic({ root: './' }));
+// Environment info endpoint  
+app.get('/api/env', (c) => {
+  return c.json({
+    platform: 'Cloudflare Workers',
+    timestamp: new Date().toISOString(),
+    environment: 'production',
+    tr2b: 'Template React To Backend',
+    edge: true,
+    region: c.req.cf?.colo || 'unknown'
+  })
+})
 
-// Serve React app for all other routes (SPA routing)
-app.get('*', serveStatic({ 
-  path: './index.html',
-  mimes: {
-    html: 'text/html; charset=UTF-8',
-  }
-}));
+// Demo data endpoint adapted from TR2B
+app.get('/api/data', (c) => {
+  return c.json({
+    message: 'TR2B API running on Cloudflare Workers edge network',
+    data: [
+      { id: 1, name: 'Edge Demo Item 1', type: 'serverless', location: c.req.cf?.colo || 'edge' },
+      { id: 2, name: 'Edge Demo Item 2', type: 'serverless', location: c.req.cf?.colo || 'edge' },
+      { id: 3, name: 'Edge Demo Item 3', type: 'serverless', location: c.req.cf?.colo || 'edge' }
+    ],
+    total: 3,
+    timestamp: new Date().toISOString(),
+    edgeLocation: c.req.cf?.colo,
+    country: c.req.cf?.country
+  })
+})
 
-// Error handling
-app.onError((err: any, c: any) => {
-  console.error('Application error:', err);
-  return c.json({ 
-    error: 'Internal Server Error',
-    message: err.message,
-    timestamp: new Date().toISOString()
-  }, 500);
-});
-
-// 404 handler
-app.notFound((c: any) => {
-  // For API routes, return JSON error
-  if (c.req.path.startsWith('/api/')) {
-    return c.json({ error: 'Not Found', path: c.req.path }, 404);
+// Session management using Cloudflare KV (replaces Express session)
+app.get('/api/session', async (c) => {
+  const sessionId = crypto.randomUUID()
+  const sessionData = {
+    id: sessionId,
+    created: new Date().toISOString(),
+    platform: 'Cloudflare Workers',
+    tr2b: true,
+    edge: true,
+    location: c.req.cf?.colo
   }
   
-  // For frontend routes, serve the React app (SPA routing)
-  return serveStatic({ path: './index.html' })(c);
-});
+  await c.env.SESSION_KV.put(`session:${sessionId}`, JSON.stringify(sessionData), {
+    expirationTtl: 3600 // 1 hour TTL
+  })
+  
+  return c.json({
+    message: 'Session created in Cloudflare KV',
+    session: sessionData
+  })
+})
 
-export default app;
+// Retrieve session from KV
+app.get('/api/session/:id', async (c) => {
+  const sessionId = c.req.param('id')
+  const sessionData = await c.env.SESSION_KV.get(`session:${sessionId}`)
+  
+  if (!sessionData) {
+    return c.json({ error: 'Session not found' }, 404)
+  }
+  
+  return c.json({
+    message: 'Session retrieved from Cloudflare KV',
+    session: JSON.parse(sessionData)
+  })
+})
+
+// User management endpoints (adapted from TR2B Express routes)
+const users = new Map<string, any>()
+
+app.get('/api/users', (c) => {
+  return c.json({
+    users: Array.from(users.values()),
+    total: users.size,
+    platform: 'Cloudflare Workers'
+  })
+})
+
+app.post('/api/users', async (c) => {
+  const { username, email } = await c.req.json()
+  
+  if (!username || !email) {
+    return c.json({ error: 'Username and email are required' }, 400)
+  }
+  
+  const id = crypto.randomUUID()
+  const user = { 
+    id, 
+    username, 
+    email, 
+    createdAt: new Date().toISOString(),
+    platform: 'Cloudflare Workers'
+  }
+  users.set(id, user)
+  
+  return c.json(user, 201)
+})
+
+// Serve static assets from TR2B build (handled by ASSETS binding)
+app.use('/*', serveStatic({ root: './' }))
+
+export default app
